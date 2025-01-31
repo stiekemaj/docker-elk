@@ -144,7 +144,7 @@ git clone https://github.com/deviantony/docker-elk.git
 Then, initialize the Elasticsearch users and groups required by docker-elk by executing the command:
 
 ```sh
-docker compose up setup
+docker compose up setup --force-recreate
 ```
 
 If everything went well and the setup completed without error, start the other stack components:
@@ -506,3 +506,5 @@ See the following Wiki pages:
   }
 }
 -->
+
+https://github.com/deviantony/docker-elk?tab=readme-ov-file#injecting-data

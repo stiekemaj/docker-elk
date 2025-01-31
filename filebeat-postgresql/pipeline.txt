@@ -1,0 +1,54 @@
+PUT _ingest/pipeline/postgresql-log-pipeline
+{
+  "description": "Parses PostgreSQL logs and merges LOG and DETAIL lines",
+  "processors": [
+    {
+      "grok": {
+        "field": "message",
+        "patterns": [
+          "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:timezone} \\[%{NUMBER:process_id}\\] %{LOGLEVEL:log_level}: execute <unnamed>: %{GREEDYDATA:query}",
+          "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:timezone} \\[%{NUMBER:process_id}\\] %{LOGLEVEL:log_level}: parameters: %{GREEDYDATA:parameters}"
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "process_id",
+        "type": "integer",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "timestamp",
+        "formats": ["yyyy-MM-dd HH:mm:ss.SSS"],
+        "ignore_failure": true
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "if": "ctx.containsKey('query') && ctx.containsKey('parameters')",
+        "source": """
+          Map paramMap = new HashMap();
+          def pattern = /\\$(\\d+) = '([^']*)'/;
+          def matches = pattern.matcher(ctx.parameters);
+          for (def match : matches) {
+            paramMap.put(match.group(1), match.group(2));
+          }
+          def reconstructedQuery = ctx.query;
+          for (entry in paramMap.entrySet()) {
+            reconstructedQuery = reconstructedQuery.replace('$' + entry.getKey(), "'" + entry.getValue() + "'");
+
+          }
+          ctx.reconstructed_query = reconstructedQuery;
+        """
+      }
+    },
+    {
+      "remove": {
+        "field": "message"
+      }
+    }
+  ]
+}

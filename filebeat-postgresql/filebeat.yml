@@ -1,0 +1,23 @@
+filebeat.inputs:
+  - type: filestream
+    id: postgres-logs
+    enabled: true
+    paths:
+      - /var/log/postgresql/*.log
+    parsers:
+      - multiline:
+          pattern: '^\d{4}-\d{2}-\d{2}'
+          negate: true
+          match: after
+
+output.elasticsearch:
+  hosts: ["http://localhost:9200"]
+  username: "elastic"
+  password: "changeme"
+  pipeline: "postgresql-log-pipeline"  # Tell Elasticsearch to use this pipeline
+  data_stream:
+    dataset: "postgresql"
+    type: "logs"
+
+setup.template.enabled: false
+setup.ilm.enabled: false
