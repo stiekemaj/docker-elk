@@ -1,0 +1,20 @@
+PUT _index_template/logs-postgresql-template
+{
+  "index_patterns": ["logs-postgresql*"],
+  "data_stream": {},
+  "template": {
+    "settings": {
+      "number_of_shards": 1
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "process_id": { "type": "integer" },
+        "log_level": { "type": "keyword" },
+        "query": { "type": "text" },
+        "parameters": { "type": "text" },
+        "reconstructed_query": { "type": "text" }
+      }
+    }
+  }
+}

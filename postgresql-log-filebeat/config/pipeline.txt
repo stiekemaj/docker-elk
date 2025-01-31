@@ -6,8 +6,8 @@ PUT _ingest/pipeline/postgresql-log-pipeline
       "grok": {
         "field": "message",
         "patterns": [
-          "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:timezone} \\[%{NUMBER:process_id}\\] %{LOGLEVEL:log_level}: execute <unnamed>: %{GREEDYDATA:query}",
-          "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:timezone} \\[%{NUMBER:process_id}\\] %{LOGLEVEL:log_level}: parameters: %{GREEDYDATA:parameters}"
+          "%{TIMESTAMP_ISO8601:timestamp} %{WORD:timezone} \\[%{NUMBER:process_id}\\] %{WORD:log_level}:  execute <unnamed>: (?<query>(.|\\r|\\n)*)",
+          "%{TIMESTAMP_ISO8601:timestamp} %{WORD:timezone} \\[%{NUMBER:process_id}\\] %{WORD:log_level}:  parameters: %{GREEDYDATA:parameters}"
         ]
       }
     },
@@ -21,8 +21,9 @@ PUT _ingest/pipeline/postgresql-log-pipeline
     {
       "date": {
         "field": "timestamp",
+        "timezone": "{{timezone}}",
         "formats": ["yyyy-MM-dd HH:mm:ss.SSS"],
-        "ignore_failure": true
+        "ignore_failure": false
       }
     },
     {

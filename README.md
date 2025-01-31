@@ -31,7 +31,7 @@ Other available stack variants:
 ## tl;dr
 
 ```sh
-docker compose up setup
+docker compose up setup --force-recreate
 ```
 
 ```sh

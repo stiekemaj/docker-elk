@@ -104,6 +104,20 @@ services:
       - elasticsearch
     restart: unless-stopped
 
+  postgresql-log-filebeat:
+    build:
+      context: postgresql-log-filebeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - /Users/Shared/logs/postgresql:/var/log/postgresql
+      - ./postgresql-log-filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
 networks:
   elk:
     driver: bridge

@@ -3,21 +3,21 @@ filebeat.inputs:
     id: postgres-logs
     enabled: true
     paths:
+      - /var/log/postgresql/*.txt
       - /var/log/postgresql/*.log
     parsers:
       - multiline:
+          type: pattern
           pattern: '^\d{4}-\d{2}-\d{2}'
           negate: true
           match: after
 
 output.elasticsearch:
-  hosts: ["http://localhost:9200"]
-  username: "elastic"
+  hosts: ["http://elasticsearch:9200"]
+  username: "filebeat_internal"
   password: "changeme"
-  pipeline: "postgresql-log-pipeline"  # Tell Elasticsearch to use this pipeline
-  data_stream:
-    dataset: "postgresql"
-    type: "logs"
+  pipeline: "postgresql-log-pipeline"
+  index: "logs-postgresql"
 
 setup.template.enabled: false
 setup.ilm.enabled: false
